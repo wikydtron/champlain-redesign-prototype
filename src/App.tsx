@@ -14,6 +14,7 @@ import {
   HeartHandshake,
   Landmark,
   Mail,
+  Maximize2,
   MapPin,
   Menu,
   MessageCircle,
@@ -72,31 +73,61 @@ const schoolLifeLinks = [
   { href: "/vie-scolaire/sante-et-mieux-etre", icon: ShieldCheck },
 ];
 
-const campusPhotos = [
+type CampusPhoto = {
+  src: string;
+  title: string;
+  copy: string;
+  position?: string;
+};
+
+const campusPhotos: CampusPhoto[] = [
+  {
+    src: "/assets/school-photos/aerial-campus.png",
+    title: "Vue aérienne du campus",
+    copy: "Une école vaste, lumineuse et entourée d’espaces verts.",
+    position: "center 48%",
+  },
   {
     src: "/assets/school-photos/exterior-main.jpg",
     title: "Entrée principale",
     copy: "Une première impression claire, lumineuse et professionnelle.",
+    position: "58% center",
+  },
+  {
+    src: "/assets/school-photos/playground-exterior.png",
+    title: "Cour extérieure",
+    copy: "Des espaces de jeu et de rassemblement intégrés à la vie scolaire.",
+    position: "center 54%",
+  },
+  {
+    src: "/assets/school-photos/hallway-library.png",
+    title: "Couloir et bibliothèque",
+    copy: "Des corridors clairs qui ouvrent sur des lieux d’apprentissage.",
+    position: "center center",
   },
   {
     src: "/assets/school-photos/gymnasium.jpg",
     title: "Gymnase",
     copy: "Un espace polyvalent pour bouger, se rassembler et célébrer.",
+    position: "center center",
   },
   {
     src: "/assets/school-photos/learning-space.jpg",
     title: "Espaces d’apprentissage",
     copy: "Des zones ouvertes et colorées qui soutiennent la collaboration.",
+    position: "35% center",
   },
   {
     src: "/assets/school-photos/commons-hall.jpg",
     title: "Aires communes",
     copy: "Un environnement accueillant pour les transitions et la vie scolaire.",
+    position: "center center",
   },
   {
     src: "/assets/school-photos/exterior-flags.jpg",
     title: "Façade et drapeaux",
     copy: "Une école bien ancrée dans sa communauté francophone.",
+    position: "44% center",
   },
 ];
 
@@ -220,6 +251,24 @@ function Header({
 
 function HomePage({ onNavigate }: { onNavigate: (href: string | null) => void }) {
   const latestNews = news.slice(0, 3);
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
+  const [zoomPhoto, setZoomPhoto] = useState<CampusPhoto | null>(null);
+  const activePhoto = campusPhotos[activePhotoIndex] ?? campusPhotos[0];
+
+  useEffect(() => {
+    if (!zoomPhoto) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setZoomPhoto(null);
+    };
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [zoomPhoto]);
+
   return (
     <main>
       <section className="heroSection">
@@ -304,17 +353,61 @@ function HomePage({ onNavigate }: { onNavigate: (href: string | null) => void })
             <ArrowRight aria-hidden="true" size={18} />
           </button>
         </div>
-        <div className="photoMosaic">
-          {campusPhotos.map((photo, index) => (
-            <figure key={photo.src} className={index === 0 ? "campusPhoto featured" : "campusPhoto"}>
-              <img src={assetUrl(photo.src)} alt={photo.title} />
+        <div className="photoExperience">
+          <button
+            className="photoStage"
+            type="button"
+            onClick={() => setZoomPhoto(activePhoto)}
+            aria-label={`Agrandir ${activePhoto.title}`}
+          >
+            <img
+              src={assetUrl(activePhoto.src)}
+              alt={activePhoto.title}
+              style={{ objectPosition: activePhoto.position }}
+            />
+            <span className="zoomCue" aria-hidden="true">
+              <Maximize2 size={18} />
+            </span>
+            <span className="stageCaption">
+              <strong>{activePhoto.title}</strong>
+              <span>{activePhoto.copy}</span>
+            </span>
+          </button>
+          <div className="photoStrip" aria-label="Photos de l’école">
+            {campusPhotos.map((photo, index) => (
+              <button
+                key={photo.src}
+                className={index === activePhotoIndex ? "photoThumb active" : "photoThumb"}
+                type="button"
+                onMouseEnter={() => setActivePhotoIndex(index)}
+                onFocus={() => setActivePhotoIndex(index)}
+                onClick={() => {
+                  setActivePhotoIndex(index);
+                  setZoomPhoto(photo);
+                }}
+                aria-label={`Afficher ${photo.title}`}
+                aria-pressed={index === activePhotoIndex}
+              >
+                <img src={assetUrl(photo.src)} alt="" style={{ objectPosition: photo.position }} />
+                <span>{photo.title}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+        {zoomPhoto && (
+          <div className="photoLightbox" role="dialog" aria-modal="true" aria-label={zoomPhoto.title} onClick={() => setZoomPhoto(null)}>
+            <button className="lightboxClose" type="button" onClick={() => setZoomPhoto(null)} aria-label="Fermer l’image agrandie">
+              <X aria-hidden="true" />
+            </button>
+            <figure onClick={(event) => event.stopPropagation()}>
+              <img src={assetUrl(zoomPhoto.src)} alt={zoomPhoto.title} style={{ objectPosition: zoomPhoto.position }} />
               <figcaption>
-                <strong>{photo.title}</strong>
-                <span>{photo.copy}</span>
+                <strong>{zoomPhoto.title}</strong>
+                <span>{zoomPhoto.copy}</span>
               </figcaption>
             </figure>
-          ))}
-        </div>
+          </div>
+        )}
       </section>
 
       <section className="sectionFrame newsSection">
