@@ -366,19 +366,20 @@ img {
 
 .photoCompass {
   position: absolute;
-  right: 8%;
-  top: 8%;
+  right: clamp(104px, 21%, 130px);
+  top: 9%;
   z-index: 2;
-  width: 128px;
-  height: 128px;
+  width: clamp(52px, 5.8vw, 76px);
+  height: clamp(52px, 5.8vw, 76px);
   color: var(--yellow-500);
+  opacity: 0.9;
   animation: rotateCompass 18s linear infinite;
 }
 
 .photoCompass svg {
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 6px 10px rgba(0, 26, 53, 0.3));
+  filter: drop-shadow(0 5px 8px rgba(0, 26, 53, 0.26));
 }
 
 .waveRibbons {
@@ -1384,6 +1385,13 @@ img {
   .heroMedia,
   .heroMedia img {
     min-height: 360px;
+  }
+
+  .photoCompass {
+    right: 8%;
+    top: 8%;
+    width: 64px;
+    height: 64px;
   }
 
   .introBand,
