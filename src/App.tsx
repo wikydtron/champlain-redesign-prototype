@@ -325,7 +325,7 @@ function HomePage({ onNavigate }: { onNavigate: (href: string | null) => void })
         <div className="newsRail">
           {latestNews.map((item) => (
             <button key={item.href} className="newsCard" onClick={() => onNavigate(item.href)}>
-              {item.images[0] && <img src={item.images[0]} alt="" />}
+              {item.images[0] && <img src={assetUrl(item.images[0])} alt="" />}
               <span className="newsDate">{item.date}</span>
               <h3>{item.title}</h3>
               <p>{summarize(item.body) || "Une nouvelle de la communauté scolaire Champlain."}</p>
